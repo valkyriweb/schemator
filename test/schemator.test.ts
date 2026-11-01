@@ -5077,7 +5077,7 @@ describe("schemator", () => {
     expect(hasSimplification(aggregate)).toBe(false);
   });
 
-  test("composes parent and child renames", () => {
+  test("composes parent and child renames without changing siblings or other models", () => {
     const graph: ModelGraph = {
       schemaVersion: 1,
       source: { path: "schema.json", revision: null },
@@ -5091,6 +5091,16 @@ describe("schemator", () => {
             field("config.recipe", "recipe", "string", false),
             field("items", "items", "{ recipe: string }[]", true),
             field("items[].recipe", "recipe", "string", false),
+            field("configBackup", "configBackup", "string", false),
+          ],
+        },
+        {
+          id: "OtherModel",
+          kind: "object",
+          source: sourceSpan(),
+          fields: [
+            { ...field("config", "config", "{ recipe: string }", true), parent: "OtherModel" },
+            { ...field("config.recipe", "recipe", "string", false), parent: "OtherModel" },
           ],
         },
       ],
@@ -5099,8 +5109,8 @@ describe("schemator", () => {
       schemaVersion: 1,
       ok: true,
       summary: {
-        totalFields: 4,
-        keep: 0,
+        totalFields: 7,
+        keep: 3,
         rename: 4,
         merge: 0,
         derive: 0,
@@ -5118,20 +5128,24 @@ describe("schemator", () => {
       ],
     };
 
-    const fields = applyAggregateToGraph(graph, aggregate).models[0]?.fields ?? [];
+    const applied = applyAggregateToGraph(graph, aggregate);
+    const fields = applied.models[0]?.fields ?? [];
 
     expect(fields.map((item) => item.path)).toEqual([
       "settings",
       "settings.variant",
       "entries",
       "entries[].variant",
+      "configBackup",
     ]);
     expect(fields.map((item) => [item.path, item.type])).toEqual([
       ["settings", "{ variant: string }"],
       ["settings.variant", "string"],
       ["entries", "{ variant: string }[]"],
       ["entries[].variant", "string"],
+      ["configBackup", "string"],
     ]);
+    expect(applied.models[1]?.fields).toEqual(graph.models[1]?.fields);
   });
 
   test("records composed final paths for nested applied renames", () => {
