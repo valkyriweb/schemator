@@ -1,24 +1,23 @@
 # schemator
 
-Schemator reviews a draft data model and pushes it toward a smaller, clearer
-schema.
+Schemator is a schema and data-model review CLI for agents.
 
-It extracts fields from TypeScript, JSON Schema, YAML, JSON, or Markdown
-proposal snippets, asks independent reviewers to challenge each field, applies
-safe reductions, and repeats until the graph stabilizes.
+It turns draft TypeScript, JSON Schema, YAML, JSON, or Markdown proposal
+snippets into a reviewed field graph, asks independent reviewers to challenge
+each field, applies safe reductions, and repeats until the model stabilizes.
 
 ## Quick Start
 
 Install the published package:
 
 ```bash
-npm install -g @dutifuldev/schemator
+npm install -g @osolmaz/schemator
 ```
 
 Or use a local checkout:
 
 ```bash
-git clone https://github.com/dutifuldev/schemator.git
+git clone https://github.com/osolmaz/schemator.git
 cd schemator
 npm install
 ```
@@ -57,7 +56,7 @@ review a data model with Schemator.
 Use Schemator to review and simplify this project's data model.
 
 Attention agent: start with this file before changing files:
-https://raw.githubusercontent.com/dutifuldev/schemator/refs/heads/main/docs/AGENT_ENTRYPOINT.md
+https://raw.githubusercontent.com/osolmaz/schemator/refs/heads/main/docs/AGENT_ENTRYPOINT.md
 
 Follow it exactly. Inspect the existing schema or proposal, run Schemator,
 review the report and diff, and ask only for missing product semantics or
@@ -66,9 +65,12 @@ naming constraints before applying schema changes.
 
 ## Review Strategy
 
-`codex` is the default strategy. It starts one independent `codex exec` reviewer
-per field, validates each JSON result, aggregates the decisions, and applies
-safe changes.
+`pi` is the default strategy. It starts one independent Pi reviewer per field
+in a bounded worker process. Each worker runs an in-memory Pi session with a
+single `submit_field_review` tool, validates each JSON result, aggregates the
+decisions, and applies safe changes. Pi uses its canonical authentication and
+model configuration; pass `--pi-model provider/model` and `--pi-thinking`
+to pin a reviewer model.
 
 Use local mode only for smoke tests:
 
@@ -112,7 +114,7 @@ Do a manual naming and product-semantics pass before accepting the final model.
 
 ## Bundled Agent Skills
 
-Schemator exposes its agent skills through [Skillflag](https://github.com/dutifuldev/skillflag):
+Schemator exposes its agent skills through [Skillflag](https://github.com/osolmaz/skillflag):
 
 ```bash
 schemator --skill list
@@ -127,7 +129,7 @@ Bundled skills:
 
 ## More
 
-- [npm package](https://www.npmjs.com/package/@dutifuldev/schemator)
+- [npm package](https://www.npmjs.com/package/@osolmaz/schemator)
 
 ## License
 
